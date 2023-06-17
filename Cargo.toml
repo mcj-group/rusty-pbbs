@@ -1,64 +1,7 @@
-[package]
-name    = "pbbs"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = ["pbbs", "parlay", "enhanced_rayon"]
+default-members = ["pbbs"]
 
-# MIS
-[[bin]]
-name    = "mis"
-path    = "src/benchmarks/maximal_independent_set/mis_time.rs"
-test    = false
-
-# [[bin]]
-# name    = "mis_check"
-# path    = "src/benchmarks/maximal_independent_set/bench/mis_check.rs"
-# test    = false
-
-# MM
-[[bin]]
-name    = "mm"
-path    = "src/benchmarks/maximal_matching/mm_time.rs"
-test    = false
-
-# [[bin]]
-# name    = "mm_check"
-# path    = "src/benchmarks/maximal_matching/bench/mm_check.rs"
-# test    = false
-
-# ISort
-[[bin]]
-name    = "isort"
-path    = "src/benchmarks/integer_sort/isort_time.rs"
-test    = false
-
-# [[bin]]
-# name    = "isort_check"
-# path    = "src/benchmarks/integer_sort/bench/isort_check.rs"
-# test    = false
-
-# Sort
-[[bin]]
-name    = "sort"
-path    = "src/benchmarks/comparison_sort/sort_time.rs"
-test    = false
-
-
-[dependencies]
-rayon   = "1.7.0"
-crossbeam   = "0.8.2"
-clap = { version = "3.2.6", features = ["derive"] }
-config = "0.13.1"
+[workspace.dependencies]
+rayon   = "*"
 num-traits = "*"
-affinity = "*"
-parlay  = { path = "src/parlay/" }
-enhanced_rayon  = { path = "src/enhanced_rayon/", default-features = false }
-
-[features]
-default = ["mem_safe", "rng_ind_safe", "sng_ind_safe"]
-rng_ind_safe = ["enhanced_rayon/rng_ind_safe"]
-rng_ind_unsafe = ["enhanced_rayon/rng_ind_unsafe"]
-sng_ind_safe = ["enhanced_rayon/sng_ind_safe"]
-sng_ind_unsafe = ["enhanced_rayon/sng_ind_unsafe"]
-sng_ind_atomic = []
-AW_safe = []
-mem_safe = []

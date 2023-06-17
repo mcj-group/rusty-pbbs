@@ -1,0 +1,16 @@
+# [target.x86_64-unknown-linux-gnu]
+# linker = "/path/to/linker" # set a custom linker
+# rustflags = [
+#     "-C", "target-cpu=native", # change to other CPUs when cross compiling
+#     "-C", "link-arg=--ld-path=/path/to/linker",
+# ]
+
+[profile.release]
+opt-level       = 3      # Optimization level
+debug           = 0      # Include debug info
+debug-assertions = false # Enables debug assertions
+codegen-units   = 1      # Number of code generation units
+# lto            = true    # link-time optimization
+panic          = "abort" # abort upon panics
+overflow-checks = false
+

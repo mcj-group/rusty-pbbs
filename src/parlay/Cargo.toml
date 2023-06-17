@@ -1,0 +1,10 @@
+[package]
+name = "parlay"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rayon = "1.7.0"
+num-traits = "*"
+affinity = "*"
+enhanced_rayon = { path = "../enhanced_rayon/" }

@@ -1,0 +1,15 @@
+[package]
+name = "enhanced_rayon"
+version = "0.1.1"
+edition = "2021"
+
+[dependencies]
+rayon = "1.7.0"
+num-traits = "*"
+
+[features]
+default = ["rng_ind_safe", "sng_ind_safe"]
+rng_ind_safe = []
+rng_ind_unsafe = []
+sng_ind_safe = []
+sng_ind_unsafe = []

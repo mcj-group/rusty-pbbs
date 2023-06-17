@@ -1,0 +1,12 @@
+*target/
+results/*.json
+*.lock
+*.out
+*.err
+*.d
+*.o
+*.cargo
+*.png
+*.svg
+*.pdf
+*.pyc

@@ -225,7 +225,11 @@ pub fn integer_sort<T, F>(
     F: Fn(T) -> DefInt + Sync + Send,
     T: Copy + Send + Sync,
 {
-    let mut tmp = maybe_uninit_vec![T::default(); inp.len()];
-    *out = maybe_uninit_vec![T::default(); inp.len()];
-    integer_sort_(inp, out, &mut tmp, get_key, bits, 0);
+    if inp.len() == 0 {
+        *out = vec![];
+    } else {
+        let mut tmp = maybe_uninit_vec![inp[0]; inp.len()];
+        *out = maybe_uninit_vec![inp[0]; inp.len()];
+        integer_sort_(inp, out, &mut tmp, get_key, bits, 0);
+    }
 }

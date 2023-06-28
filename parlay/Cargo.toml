@@ -6,5 +6,12 @@ edition = "2021"
 [dependencies]
 rayon.workspace = true
 num-traits.workspace = true
-affinity = "*"
 enhanced_rayon = { path = "../enhanced_rayon/" }
+
+[features]
+rng_ind_safe = ["enhanced_rayon/rng_ind_safe"]
+sng_ind_safe = ["enhanced_rayon/sng_ind_safe"]
+sng_ind_unsafe = ["enhanced_rayon/sng_ind_unsafe"]
+sng_ind_atomic = ["enhanced_rayon/sng_ind_unsafe"]
+AW_safe = []
+mem_safe = []

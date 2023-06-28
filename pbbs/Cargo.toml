@@ -6,20 +6,20 @@ edition = "2021"
 [dependencies]
 rayon.workspace = true
 num-traits.workspace = true
+affinity = "0.1.2"
 crossbeam   = "0.8.2"
 parlay  = { path = "../parlay/" }
 enhanced_rayon  = { path = "../enhanced_rayon/" }
 clap = { version = "4.3.4", features = ["derive"] }
 
 [features]
-default = ["mem_safe", "rng_ind_safe", "sng_ind_safe"]
-rng_ind_safe = ["enhanced_rayon/rng_ind_safe"]
-rng_ind_unsafe = ["enhanced_rayon/rng_ind_unsafe"]
-sng_ind_safe = ["enhanced_rayon/sng_ind_safe"]
-sng_ind_unsafe = ["enhanced_rayon/sng_ind_unsafe"]
-sng_ind_atomic = []
-AW_safe = []
-mem_safe = []
+default = ["mem_safe", "rng_ind_safe", "sng_ind_safe", "AW_safe"]
+rng_ind_safe = ["enhanced_rayon/rng_ind_safe", "parlay/rng_ind_safe"]
+sng_ind_safe = ["enhanced_rayon/sng_ind_safe", "parlay/sng_ind_safe"]
+sng_ind_unsafe = ["enhanced_rayon/sng_ind_unsafe", "parlay/sng_ind_unsafe"]
+sng_ind_atomic = ["enhanced_rayon/sng_ind_unsafe", "parlay/sng_ind_unsafe"]
+AW_safe = ["parlay/AW_safe"]
+mem_safe = ["parlay/mem_safe"]
 
 
 # MIS
@@ -28,21 +28,11 @@ name    = "mis"
 path    = "src/benchmarks/maximal_independent_set/mis_time.rs"
 test    = false
 
-# [[bin]]
-# name    = "mis_check"
-# path    = "src/benchmarks/maximal_independent_set/bench/mis_check.rs"
-# test    = false
-
 # MM
 [[bin]]
 name    = "mm"
 path    = "src/benchmarks/maximal_matching/mm_time.rs"
 test    = false
-
-# [[bin]]
-# name    = "mm_check"
-# path    = "src/benchmarks/maximal_matching/bench/mm_check.rs"
-# test    = false
 
 # ISort
 [[bin]]
@@ -50,21 +40,11 @@ name    = "isort"
 path    = "src/benchmarks/integer_sort/isort_time.rs"
 test    = false
 
-# [[bin]]
-# name    = "isort_check"
-# path    = "src/benchmarks/integer_sort/bench/isort_check.rs"
-# test    = false
-
 # SF
 [[bin]]
 name    = "sf"
 path    = "src/benchmarks/spanning_forest/sf_time.rs"
 test    = false
-
-# [[bin]]
-# name    = "sf_check"
-# path    = "src/benchmarks/spanning_forest/bench/sf_check.rs"
-# test    = false
 
 # MSF
 [[bin]]
@@ -72,13 +52,44 @@ name    = "msf"
 path    = "src/benchmarks/min_span_forest/msf_time.rs"
 test    = false
 
-# [[bin]]
-# name    = "msf_check"
-# path    = "src/benchmarks/min_span_forest/bench/msf_check.rs"
-# test    = false
-
 # Sort
 [[bin]]
 name    = "sort"
 path    = "src/benchmarks/comparison_sort/sort_time.rs"
+test    = false
+
+# BWDecode
+[[bin]]
+name    = "bw"
+path    = "src/benchmarks/bw_decode/bw_time.rs"
+test    = false
+
+# SuffixArray
+[[bin]]
+name    = "sa"
+path    = "src/benchmarks/suffix_array/sa_time.rs"
+test    = false
+
+# RemoveDuplicates
+[[bin]]
+name    = "dedup"
+path    = "src/benchmarks/remove_duplicates/dedup_time.rs"
+test    = false
+
+# Histogram
+[[bin]]
+name    = "hist"
+path    = "src/benchmarks/histogram/hist_time.rs"
+test    = false
+
+# LongestRepeatedSubString
+[[bin]]
+name    = "lrs"
+path    = "src/benchmarks/longest_repeated_sub_string/lrs_time.rs"
+test    = false
+
+# DelaunayRefinement
+[[bin]]
+name    = "dr"
+path    = "src/benchmarks/delaunay_refine/dr_time.rs"
 test    = false

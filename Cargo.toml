@@ -3,5 +3,5 @@ members = ["pbbs", "parlay", "enhanced_rayon"]
 default-members = ["pbbs"]
 
 [workspace.dependencies]
-rayon   = "*"
-num-traits = "*"
+rayon   = "1.7.0"
+num-traits = "0.2.15"

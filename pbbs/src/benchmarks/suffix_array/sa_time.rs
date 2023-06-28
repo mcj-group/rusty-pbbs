@@ -24,47 +24,67 @@
 // SOFTWARE.
 // ============================================================================
 
-use num_traits::PrimInt;
+
+use std::time::Duration;
 use rayon::prelude::*;
-use rayon::iter::{MaxLen, MinLen};
 
-mod chunks;
-mod chunks_by;
+#[path ="mod.rs"] mod sa;
+#[path ="../../misc.rs"] mod misc;
+#[path ="../macros.rs"] mod macros;
+#[path ="../../common/io.rs"] mod io;
+#[path ="../../algorithm/suffix_array.rs"] mod suffix_array;
 
-use chunks::Chunks;
-use chunks_by::ChunksBy;
-use crate::bad_use_rng_ind;
+use misc::*;
+use sa::parallel_range;
+use io::{chars_from_file, write_slice_to_file_seq};
 
+define_args!(Algs::ParRange);
+define_algs!((ParRange, "par-range"));
 
-/// This trait will add support for sng_ind and rng_ind irregular patterns
-/// to all indexed parallel iterators.
-/// `with_gran` conviently sets min and max granularity.
-pub trait EnhancedParallelIterator: IndexedParallelIterator {
-    fn with_gran(self, size: usize) -> MaxLen<MinLen<Self>>{
-        self.with_min_len(size).with_max_len(size)
-    }
+pub fn run(
+    alg: Algs,
+    rounds: usize,
+    inp: &[DefChar]
+) -> (Vec<DefInt>, Duration)
+{
+    let f = match alg {
+        Algs::ParRange => {parallel_range::suffix_array},
+    };
 
-    fn sng_ind<OTy>(self, _offsets: &[OTy]) { todo!() }
-    fn sng_ind_by<OTy>(self, _off_key: OTy) { todo!() }
+    #[cfg(not(feature = "AW_safe"))]
+    let mut r: Vec<_> = (0..inp.len())
+        .into_par_iter()
+        .map(|_| DefInt::default())
+        .collect();
+    #[cfg(feature = "AW_safe")]
+    let mut r: Vec<_> = (0..inp.len())
+        .into_par_iter()
+        .map(|_| DefAtomInt::default())
+        .collect();
 
-    fn rng_ind_by<F>(self, offset: F, len: usize) -> ChunksBy<Self, F>
-    where
-        F: Fn(usize) -> usize + Send + Clone
-    {
-        bad_use_rng_ind();
-        ChunksBy::new(self, offset, len)
-    }
-
-    fn rng_ind<'offs, OTy>(
-        self,
-        offsets: &'offs [OTy]
-    ) -> Chunks<'offs, Self, OTy>
-    where
-        OTy: PrimInt + Sync,
-    {
-        bad_use_rng_ind();
-        Chunks::new(self, offsets)
-    }
+    let mean = time_loop(
+        "sa",
+        rounds,
+        Duration::new(1, 0),
+        || {},
+        || { f(&inp, &mut r); },
+        || {}
+    );
+    #[cfg(feature = "AW_safe")]
+    let r: Vec<_> = r.into_par_iter().map(|ri| ri.load(ORDER)).collect();
+    (r, mean)
 }
 
-impl<T: IndexedParallelIterator> EnhancedParallelIterator for T {}
+fn main() {
+    init!();
+    let args = Args::parse();
+    let arr = chars_from_file(&args.ifname, false).unwrap();
+    let (r, d) = run(args.algorithm, args.rounds, &arr);
+
+    finalize!(
+        args,
+        r,
+        d,
+        write_slice_to_file_seq(&r, args.ofname)
+    );
+}

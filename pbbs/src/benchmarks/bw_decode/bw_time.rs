@@ -24,25 +24,53 @@
 // SOFTWARE.
 // ============================================================================
 
+use std::time::Duration;
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
+#[path ="mod.rs"] mod bw;
+#[path ="../../misc.rs"] mod misc;
+#[path ="../macros.rs"] mod macros;
+#[path ="../../common/io.rs"] mod io;
+#[path ="../../algorithm/bw_encode.rs"] mod bw_encode;
 
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
+use misc::*;
+use bw_encode::bw_encode;
+use io::{chars_from_file, chars_to_file};
 
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
+define_args!(Algs::ListRank);
 
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
+define_algs!((ListRank, "list-rank"));
 
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
+pub fn run(alg: Algs, rounds: usize, inp: &[DefChar]) -> (Vec<DefChar>, Duration) {
+    let f = match alg {
+        Algs::ListRank => {bw::list_rank::bw_decode},
+    };
 
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
+    let mut r = vec![];
 
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+    let mean = time_loop(
+        "bw",
+        rounds,
+        Duration::new(1, 0),
+        || {},
+        || { r = f(&inp); },
+        || {}
+    );
+    (r, mean)
+}
+
+fn main() {
+    init!();
+    let args = Args::parse();
+    let arr = chars_from_file(&args.ifname, false).unwrap();
+
+    let encoded = bw_encode(&arr);
+
+    let (r, d) = run(args.algorithm, args.rounds, &encoded);
+
+    finalize!(
+        args,
+        r,
+        d,
+        chars_to_file(&r, args.ofname).unwrap()
+    );
+}

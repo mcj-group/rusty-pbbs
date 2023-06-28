@@ -25,24 +25,57 @@
 // ============================================================================
 
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
+use std::time::Duration;
 
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
+#[path ="mod.rs"] mod lrs;
+#[path ="../../misc.rs"] mod misc;
+#[path ="../macros.rs"] mod macros;
+#[path ="../../common/io.rs"] mod io;
+#[path ="../../algorithm/lcp.rs"] mod lcp;
+#[path ="../../algorithm/range_min.rs"] mod range_min;
+#[path ="../../algorithm/suffix_array.rs"] mod suffix_array;
 
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
+use misc::*;
+use lrs::doubling;
+use io::{chars_from_file, chars_to_file};
 
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
+define_args!(Algs::Doubling);
+define_algs!((Doubling, "doubling"));
 
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
 
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
+pub fn run(
+    alg: Algs,
+    rounds: usize,
+    inp: &[DefChar]
+) -> ((usize, usize, usize), Duration)
+{
+    let f = match alg {
+        Algs::Doubling => {doubling::lrs},
+    };
 
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+    let mut r = (0, 0, 0);
+
+    let mean = time_loop(
+        "lrs",
+        rounds,
+        Duration::new(1, 0),
+        || {},
+        || { r = f(&inp); },
+        || {}
+    );
+    (r, mean)
+}
+
+fn main() {
+    init!();
+    let args = Args::parse();
+    let arr = chars_from_file(&args.ifname, false).unwrap();
+    let ((len, loc1, loc2), d) = run(args.algorithm, args.rounds, &arr);
+
+    let out = format!("len:{len}\tloc1:{loc1}\tloc2:{loc2}");
+    if !args.ofname.is_empty() {
+        chars_to_file(out.as_bytes(), args.ofname).unwrap();
+    } else { println!("{}", out); }
+    
+    println!("{:?}", d);
+}

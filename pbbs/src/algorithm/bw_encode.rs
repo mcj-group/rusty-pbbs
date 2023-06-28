@@ -24,25 +24,28 @@
 // SOFTWARE.
 // ============================================================================
 
+use rayon::prelude::*;
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
+mod suffix_array;
 
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
+use crate::{DefChar, DefInt};
+use suffix_array::suffix_array;
+use parlay::maybe_uninit_vec;
 
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
 
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
+pub fn bw_encode(s: &[DefChar]) -> Vec<DefChar> {
+    let n = s.len();
 
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
+    let ss: Vec<DefChar> = (0..1)
+        .into_par_iter()
+        .chain(s.par_iter().cloned())
+        .collect();
 
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
+    let mut sa: Vec<DefInt> = maybe_uninit_vec![0; n+1];
+    suffix_array(&ss, &mut sa);
 
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+    (0..n+1).into_par_iter().map(|i| {
+        let j = sa[i];
+        if j==0 { ss[n] } else { ss[j as usize - 1] }
+    }).collect()
+}

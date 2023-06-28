@@ -27,6 +27,7 @@
 use std::{fs, io, io::prelude::*};
 use rayon::prelude::*;
 
+#[allow(dead_code)]
 #[inline(always)]
 pub(crate) fn fmt_f64(num: f64, precision: usize, exp_pad: usize) -> String {
     let mut num = format!("{:.precision$e}", num, precision = precision);
@@ -42,6 +43,7 @@ pub(crate) fn fmt_f64(num: f64, precision: usize, exp_pad: usize) -> String {
     num
 }
 
+#[allow(dead_code)]
 pub(crate) fn write_slice_to_file_seq<T, F>(s: &[T], of: F)
 where
     T: std::string::ToString,
@@ -57,6 +59,7 @@ where
     ).expect("cannot write to output");
 }
 
+#[allow(dead_code)]
 pub(crate) fn read_file_to_vec_seq<T, P>(fname: P) -> Vec<T>
 where
     T: std::str::FromStr,
@@ -74,6 +77,7 @@ where
         .collect::<Vec<T>>()
 }
 
+#[allow(dead_code)]
 pub(crate) fn read_file_to_vec<T, P, F>(
     fname: P,
     debug_assert: Option<F>
@@ -97,6 +101,7 @@ pub(crate) fn read_file_to_vec<T, P, F>(
         .collect::<Vec<T>>()
 }
 
+#[allow(dead_code)]
 pub(crate) fn read_big_file_to_vec<T, P, F>(
     fname: P,
     debug_assert: Option<F>,
@@ -119,6 +124,7 @@ pub(crate) fn read_big_file_to_vec<T, P, F>(
         .collect::<Vec<T>>();
 }
 
+#[allow(dead_code)]
 pub(crate) fn chars_from_file<P: AsRef<std::path::Path>>(
     fname: P,
     null_terminate: bool
@@ -131,6 +137,7 @@ pub(crate) fn chars_from_file<P: AsRef<std::path::Path>>(
     Ok(buffer)
 }
 
+#[allow(dead_code)]
 pub(crate) fn chars_to_file<P: AsRef<std::path::Path>>(
     buffer: &[u8],
     fname: P

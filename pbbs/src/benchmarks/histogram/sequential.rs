@@ -24,25 +24,18 @@
 // SOFTWARE.
 // ============================================================================
 
+use num_traits::PrimInt;
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
 
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
+pub fn hist<T>(inp: &[T], buckets: usize, res: &mut Vec<T>)
+where
+    T: PrimInt + Default + Send + Sync,
+{
+    let mut result = vec![T::zero(); buckets+1];
+    for e in inp.iter() {
+        let i = (*e).to_usize().unwrap();
+        result[i] = result[i] + T::one();
+    }
 
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
-
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
-
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
-
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
-
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+    *res = result;
+}

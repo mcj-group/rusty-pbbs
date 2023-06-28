@@ -122,7 +122,7 @@ where
             .map(|i| sample_set[i * OVER_SAMPLE])
             .collect();
 
-        let mut tmp = maybe_uninit_vec![T::default(); n];
+        let mut tmp = maybe_uninit_vec![inp[0]; n];
         let mut counts = maybe_uninit_vec![0usize; m+1];
         counts[m] = 0;
 

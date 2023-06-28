@@ -96,9 +96,9 @@ impl Index<usize> for EdgeArray {
     type Output = Edge;
 
     fn index(&self, index: usize) -> &Self::Output {
-        #[cfg(not(memSafe))]
+        #[cfg(not(feature = "mem_safe"))]
         unsafe { self.es.as_ptr().add(index).as_ref().unwrap() }
-        #[cfg(memSafe)]
+        #[cfg(feature = "mem_safe")]
         &self.es[index]
     }
 }

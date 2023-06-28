@@ -30,17 +30,14 @@ mod dedup;
 pub mod prelude;
 
 
-// #[cfg(feature = "sng_ind_safe")]
-// compile_error!("The sng_ind_safe is enabled!");
-// #[cfg(feature = "sng_ind_unsafe")]
-// compile_error!("The sng_ind_unsafe is enabled!");
-
 #[cfg(all(feature = "sng_ind_unsafe", feature = "sng_ind_safe"))]
 compile_error!("Only one of the following features can be enabled:
     sng_ind_safe, sng_ind_unsafe");
 
 // the unsafe version is the safe version because there are
 // no runtime checks that can be easily avoided.
-#[cfg(all(feature = "rng_ind_unsafe", feature = "rng_ind_safe"))]
-compile_error!("Only one of the following features can be enabled:
-    rng_ind_safe, rng_ind_unsafe");
+pub(crate) fn bad_use_rng_ind() {
+    #[cfg(not(feature = "rng_ind_safe"))]
+    eprintln!("Warning: The rng_ind_safe feature is disabled
+    but the safe version is being used!");
+}

@@ -24,25 +24,53 @@
 // SOFTWARE.
 // ============================================================================
 
+#![allow(dead_code)]
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
+use std::time::Duration;
 
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
+#[path ="mod.rs"] mod dr;
+#[path ="../../misc.rs"] mod misc;
+#[path ="../macros.rs"] mod macros;
+#[path ="../../common/mod.rs"] mod common;
 
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
+use misc::*;
+use dr::incremental;
+use common::geometry::{Triangles, Point2d};
+use common::geometry_io::{read_triangles_from_file, write_triangles_to_file};
 
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
+type P = Point2d<f64>;
 
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
+define_args!(Algs::INCREMENTAL);
 
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
+define_algs!((INCREMENTAL, "incremental"));
 
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+pub fn run(
+    alg: Algs,
+    rounds: usize,
+    tris: &Triangles<P>
+) -> (Triangles<P>, Duration) {
+    let f = match alg {
+        Algs::INCREMENTAL => incremental::refine,
+    };
+
+    let mut r = Triangles { p: vec![], t: vec![] };
+    let mean = time_loop(
+        "dr",
+        rounds,
+        Duration::new(1, 0),
+        || {},
+        || { f(tris, &mut r); },
+        || {}
+    );
+    (r, mean)
+}
+
+fn main() {
+    init!();
+    let args = Args::parse();
+    let tris = read_triangles_from_file(&args.ifname, 0);
+    let (r, d) = run(args.algorithm, args.rounds, &tris);
+
+    if !args.ofname.is_empty() { write_triangles_to_file(&r, args.ofname); }
+    println!("{:?}", d);
+}

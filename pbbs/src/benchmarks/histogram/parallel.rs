@@ -24,25 +24,16 @@
 // SOFTWARE.
 // ============================================================================
 
+use num_traits::PrimInt;
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
+use parlay::internal::group_by::histogram_by_index;
+use crate::DefInt;
 
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
 
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
-
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
-
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
-
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
-
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+pub fn hist<T: PrimInt + Default + Send + Sync>(
+    inp: &[T],
+    buckets: usize,
+    res: &mut Vec<T>
+) {
+    histogram_by_index::<T, DefInt>(inp, buckets, res);
+}

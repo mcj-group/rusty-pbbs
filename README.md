@@ -1,8 +1,3 @@
-***Disclaimer:*** This repo contains 6 of the 12 benchmarks listed in our
-paper. The rest will be coming shortly. And here is the paper:
-
-
-
 [Brief Announcement: Is the Problem-Based Benchmark Suite Fearless with Rust?](https://doi.org/10.1145/3558481.3591313)<br>
 Javad Abdi, Guowei Zhang, Mark C. Jeffrey<br>
 ACM Symposium on Parallelism in Algorithms and Architectures (SPAA), 2023

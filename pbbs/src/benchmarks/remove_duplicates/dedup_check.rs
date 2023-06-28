@@ -24,25 +24,47 @@
 // SOFTWARE.
 // ============================================================================
 
+#![feature(slice_partition_dedup)]
+use clap::Parser;
+use rayon::prelude::*;
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
+#[path ="../../common/io.rs"] mod io;
+use io::read_file_to_vec;
 
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
+#[derive(Parser, Debug)]
+#[clap(version, about, long_about = None)]
+struct Args {
+    /// BW results filename
+    #[clap(value_parser, required=true)]
+    rfname: String,
 
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
+    /// the input graph's filename
+    #[clap(value_parser, required=true)]
+    ifname: String,
+}
 
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
+pub fn check(inp: &mut [i64], out: &mut [i64]) -> bool {
+    inp.par_sort_unstable();
+    let (inp_dedup, _) = inp.partition_dedup();
+    out.par_sort_unstable();
 
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
+    let mut diff_count = 0usize;
+    for i in 0..inp_dedup.len() {
+        if out[i] != inp_dedup[i] {
+            diff_count+=1;
+        }
+    }
 
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
+    if diff_count!=0 {
+        eprintln!("output file has {diff_count} differences.");
+        false
+    } else { true }
+}
 
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+fn main() {
+    let args = Args::parse();
+    let mut inp = read_file_to_vec(&args.ifname, Some(|a: &[&str]| assert_eq!(a[0], "sequenceInt")));
+    let mut out = read_file_to_vec(&args.rfname, Some(|_: &[&str]| {}));
+    if check(&mut inp, &mut out) { println!("OK"); }
+    else { eprintln!("ERR"); std::process::exit(1); }
+}

@@ -24,25 +24,53 @@
 // SOFTWARE.
 // ============================================================================
 
+use std::time::Duration;
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
+#[path ="mod.rs"] mod dedup;
+#[path ="../../misc.rs"] mod misc;
+#[path ="../macros.rs"] mod macros;
+#[path ="../../common/io.rs"] mod io;
 
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
+use dedup::parlay_hash;
+use io::{read_big_file_to_vec, write_slice_to_file_seq};
 
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
+define_args!(Algs::PARHASH);
+define_algs!((PARHASH, "parhash"));
 
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
+pub fn run(alg: Algs, rounds: usize, arr: &[u32]) -> (Vec<u32>, Duration) {
+    let f = match alg {
+        Algs::PARHASH => {parlay_hash::dedup},
+    };
 
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
+    let mut r = vec![];
+    let r_ptr = &r as *const Vec<u32> as usize;
 
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
+    let mean = time_loop(
+        "dedup",
+        rounds,
+        Duration::new(1, 0),
+        || { unsafe { *(r_ptr as *mut Vec<u32>) = vec![]; } },
+        || { f(&arr, &mut r); },
+        || {}
+    );
+    (r, mean)
+}
 
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+fn main() {
+    init!();
+    let args = Args::parse();
+    let mut arr = Vec::new();
+    read_big_file_to_vec(
+        &args.ifname,
+        Some { 0: |w: &[&str]| {debug_assert_eq!(w[0], "sequenceInt")} },
+        &mut arr
+    );
+    let (r, d) = run(args.algorithm, args.rounds, &arr);
+
+    finalize!(
+        args,
+        r,
+        d,
+        write_slice_to_file_seq(&r, args.ofname)
+    );
+}

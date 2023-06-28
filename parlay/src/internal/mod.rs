@@ -26,10 +26,12 @@
 
 mod transpose;
 pub mod merge;
+pub mod group_by;
 pub mod integer_sort;
 pub mod sequence_ops;
 pub mod counting_sort;
 pub mod binary_search;
+pub mod collect_reduce;
 
 mod merge_sort;
 pub use merge_sort::*;

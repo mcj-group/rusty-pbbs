@@ -24,25 +24,8 @@
 // SOFTWARE.
 // ============================================================================
 
+mod range_min;
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
-
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
-
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
-
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
-
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
-
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
-
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+pub(crate) mod lcp;
+pub(crate) mod union_find;
+pub(crate) mod suffix_array;

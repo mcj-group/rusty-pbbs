@@ -24,25 +24,16 @@
 // SOFTWARE.
 // ============================================================================
 
+use crate::suffix_array;
+use crate::DefChar;
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
 
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
+#[cfg(not(feature = "AW_safe"))]
+pub fn suffix_array(s: &[DefChar], r: &mut [crate::DefInt]) {
+    suffix_array::suffix_array(s, r);
+}
 
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
-
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
-
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
-
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
-
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+#[cfg(feature = "AW_safe")]
+pub fn suffix_array(s: &[DefChar], r: &mut [crate::DefAtomInt]) {
+    suffix_array::atomic_suffix_array(s, r);
+}

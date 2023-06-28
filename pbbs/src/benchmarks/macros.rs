@@ -78,7 +78,19 @@ macro_rules! define_args {
 #[macro_export]
 macro_rules! init {
     () => {
-        parlay::parallel::config_rayon();
+        use rayon::prelude::*;
+        use affinity::set_thread_affinity;
+        
+        // pin rayon's threads to cores
+        // TODO: find a better way to do this.
+        (0..rayon::current_num_threads())
+        .par_bridge()
+        .for_each(|_| {
+            set_thread_affinity(
+                [rayon::current_thread_index().unwrap()]
+            ).unwrap();
+            std::thread::sleep(std::time::Duration::from_millis(100))
+        })
     }
 }
 

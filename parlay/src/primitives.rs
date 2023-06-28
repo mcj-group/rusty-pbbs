@@ -25,8 +25,6 @@
 // ============================================================================
 
 use rayon::prelude::*;
-use rayon::iter::Map;
-use rayon::range::Iter;
 use num_traits::PrimInt;
 use enhanced_rayon::prelude::*;
 
@@ -135,7 +133,8 @@ where
     F: Fn(usize, *mut T),
 {
     let m = sum_bool_serial(flags);
-    *dest = maybe_uninit_vec![T::default(); m];
+    *dest = Vec::with_capacity(m);
+    dest.set_len(m);
     nc_pack_serial_at(arr_f, flags, dest);
 }
 
@@ -155,7 +154,8 @@ where
         .collect();
     let m = scan_inplace(&mut sums, false, |a, b| a + b);
 
-    *dest = maybe_uninit_vec![T::default(); m];
+    *dest = Vec::with_capacity(m);
+    dest.set_len(m);
 
     dest
         .par_ind_chunks_mut(&sums)
@@ -206,85 +206,4 @@ pub fn flatten_by_val<T>(arr: &[Vec<T>], dest: &mut Vec<T>) where
 {
     let ref_arr: Vec<_> = arr.iter().map(|a| a).collect();
     flatten(&ref_arr, dest);
-}
-
-
-/* -------------------- Tokens and split -------------------- */
-
-pub fn map_tokens<'a, R, G>(r: &'a [R], is_space: G, res: &mut Vec<&'a [R]>)
-where
-    R: Default + Copy + Send + Sync,
-    G: Fn(&R) -> bool + Copy + Send + Sync
-{
-    type Ipair = (i64, i64);
-    let n = r.len() - 1;
-
-    if n == 0 {
-        *res = vec![];
-        return;
-    }
-
-    let is_start = |i: usize|
-        ((i == 0) || is_space(&r[i - 1])) && (i != n) && !is_space(&r[i    ]);
-    let is_end   = |i: usize|
-        ((i == n) || is_space(&r[i    ])) && (i != 0) && !is_space(&r[i - 1]);
-
-    // associative combining function
-    // first = # of starts, second = index of last start
-    let g = |a: Ipair, b: Ipair| {
-        if b.0 == 0 {a} else {(a.0 + b.0, b.1)}
-    };
-
-    let in_vec: Map<Iter<usize>, _> = (0..n+1)
-        .into_par_iter()
-        .map(|i| { if is_start(i) {(1, i as i64)} else {(0, 0)} });
-
-    let l = num_blocks(n+1, _BLOCK_SIZE);
-
-    let mut sums: Vec<Ipair>;
-    sums = maybe_uninit_vec![Ipair::default(); l];
-    let sum = scan_delayed(in_vec.clone(), &mut sums, g);
-
-    let z = in_vec.chunks(_BLOCK_SIZE).zip(sums);
-
-    #[cfg(AW_safe)]
-    {
-        let offsets: Vec<Ipair> = z.map(|(arr, sum_p)| {
-            let mut pair = sum_p;
-            let n = arr.len();
-            for i in 0..n {
-                pair = g(pair, arr[i]);
-            }
-            pair
-        }).collect();
-        *res = offsets
-            .into_par_iter()
-            .enumerate()
-            .filter_map(|x| {
-                if is_end(x.0) { Some(&r[(x.1.1 as usize)..(x.0)]) }
-                else { None }
-            }).collect();
-    }
-    #[cfg(not(AW_safe))]
-    {
-        *res = Vec::with_capacity(sum.0 as usize);
-        unsafe{ res.set_len(sum.0 as usize); }
-        let res_ptr = res.as_ptr() as usize;
-
-        z.enumerate().for_each(|(b, (arr, sum_p))| {
-            let mut pair = sum_p;
-            let n = arr.len();
-            for i in 0..n {
-                pair = g(pair, arr[i]);
-                //result
-                let x0 = b * _BLOCK_SIZE + i;
-                if is_end(x0) {
-                    unsafe {
-                        (res_ptr as *mut &[R])
-                            .add(pair.0 as usize - 1)
-                            .write(&r[(pair.1 as usize)..(x0 as usize)]);
-                    }}
-            }
-        });
-    }
 }

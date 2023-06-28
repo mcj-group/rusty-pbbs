@@ -24,25 +24,44 @@
 // SOFTWARE.
 // ============================================================================
 
+use clap::Parser;
+use rayon::prelude::*;
 
-#[allow(dead_code)]
-pub(crate) type DefInt = u32;
+#[path ="../../common/io.rs"] mod io;
+use io::chars_from_file;
 
-#[allow(dead_code)]
-pub(crate) type DefIntS = i32;
+#[derive(Parser, Debug)]
+#[clap(version, about, long_about = None)]
+struct Args {
+    /// BW results filename
+    #[clap(value_parser, required=true)]
+    rfname: String,
 
-#[allow(dead_code)]
-pub(crate) type DefFloat = f32;
+    /// the input graph's filename
+    #[clap(value_parser, required=true)]
+    ifname: String,
+}
 
-#[allow(dead_code)]
-pub(crate) type DefChar = u8;
+pub fn check(inp: &[u8], out: &[u8]) -> bool {
+    if inp.len() != out.len() {
+        eprintln!("files' lengthes differ.");
+        return false;
+    }
+    let diff: Vec<_> = (inp, out)
+        .into_par_iter()
+        .filter(|(i, o)| i != o)
+        .collect();
+    if diff.len() == 0 { true }
+    else {
+        eprintln!("different chars: {}", diff.len());
+        false
+    }
+}
 
-#[allow(dead_code)]
-pub(crate) type DefAtomInt = std::sync::atomic::AtomicU32;
-
-#[allow(dead_code)]
-pub(crate) type DefAtomIntS = std::sync::atomic::AtomicI32;
-
-#[allow(dead_code)]
-pub(crate) static ORDER: std::sync::atomic::Ordering
-    = std::sync::atomic::Ordering::Relaxed;
+fn main() {
+    let args = Args::parse();
+    let inp = chars_from_file(&args.ifname, false).unwrap();
+    let out = chars_from_file(&args.rfname, false).unwrap();
+    if check(&inp, &out) { println!("OK"); }
+    else { eprintln!("ERR"); std::process::exit(1); }
+}

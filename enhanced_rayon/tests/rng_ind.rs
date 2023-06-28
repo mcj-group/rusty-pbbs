@@ -323,6 +323,25 @@ mod slice {
     }
 
     #[test]
+    fn one_sub_chunk_by() {
+        let mut v = (0..100).collect::<Vec<usize>>();
+        v
+            .par_ind_chunks_mut_by(|_| 20, 1)
+            .with_gran(1)
+            .for_each(|v| {
+                println!("{:?}", v.len());
+                v.iter_mut().for_each(|vi| *vi = 1);
+            });
+        assert_eq!(
+            v,
+            (0..20)
+                .into_iter()
+                .chain((20..100).into_iter().map(|_| 1))
+                .collect::<Vec<_>>()
+            );
+    }
+
+    #[test]
     fn empty_chunks_by() {
         let mut v = (0..100).collect::<Vec<usize>>();
         v

@@ -24,15 +24,14 @@
 // SOFTWARE.
 // ============================================================================
 
-pub mod io;
-pub mod graph;
-pub mod atomics;
-pub mod graph_io;
-pub mod spec_for;
-pub mod topology;
-pub mod geometry;
-pub mod geometry_io;
-pub mod topology_from_triangles;
+pub(crate) mod io;
+pub(crate) mod graph;
+pub(crate) mod atomics;
+pub(crate) mod graph_io;
+pub(crate) mod spec_for;
+pub(crate) mod topology;
+pub(crate) mod geometry;
+pub(crate) mod time_loop;
+pub(crate) mod geometry_io;
+pub(crate) mod topology_from_triangles;
 
-mod time_loop;
-pub use time_loop::time_loop;

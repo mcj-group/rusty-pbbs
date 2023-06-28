@@ -185,17 +185,15 @@ fn count_sort_helper<T, F>(
 
     // calculate destination offsets
     let dest_offsets = maybe_uninit_vec![0usize; num_blocks * num_buckets];
-    let dest_off_ptr = dest_offsets.as_ptr() as usize;
-    let out_ptr = out.as_ptr() as usize;
 
     bucket_offsets[..num_buckets]
         .par_iter()
         .enumerate()
         .for_each(|(i, bo)| {
-            let mut v = *bo as usize * size_of::<T>() + out_ptr;
+            let mut v = *bo as usize * size_of::<T>() + out.as_ptr() as usize;
             for j in 0..num_blocks {
                 unsafe {
-                    (dest_off_ptr as *mut usize)
+                    (dest_offsets.as_ptr() as *mut usize)
                         .add(j * num_buckets + i)
                         .write(v);
                 }
@@ -227,7 +225,7 @@ pub fn count_sort<T, F>(
 {
     #[cfg(feature = "AW_safe")]
     eprintln!("AW_safe cannot be used with count_sort for now. \
-        Switched to unafe AW.");
+        Switched to unsafe AW.");
 
     let n = inp.len();
     debug_assert_eq!(n, out.len());

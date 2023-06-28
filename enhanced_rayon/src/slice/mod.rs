@@ -37,6 +37,7 @@ use chunks::ChunksMut;
 use chunks_by::ChunksMutBy;
 use sng_ind::SngInd;
 use sng_ind_by::SngIndBy;
+use crate::bad_use_rng_ind;
 
 
 pub trait EnhancedParallelSlice<'data, T: Send> {
@@ -86,7 +87,12 @@ impl<'data, T: Send> EnhancedParallelSlice<'data, T> for [T]
         &'data mut self,
         offsets: &'offs [O]
     ) -> ChunksMut<'data, 'offs, T, O>
-    { ChunksMut::new(offsets, self) }
+    {
+        bad_use_rng_ind();
+        assert!(offsets.len() > 0);
+        let st = offsets[0].to_usize().unwrap();
+        ChunksMut::new(offsets, &mut self[st..])
+    }
 
     fn par_ind_chunks_mut_by<F>(
         &'data mut self,
@@ -95,7 +101,10 @@ impl<'data, T: Send> EnhancedParallelSlice<'data, T> for [T]
     ) -> ChunksMutBy<'data, T, F>
     where
         F: Fn(usize) -> usize + Send + Sync + Clone
-    { ChunksMutBy::new(offset, 0..len, self) }
+    {
+        bad_use_rng_ind();
+        ChunksMutBy::new(offset.clone(), 0..len, &mut self[offset(0)..])
+    }
 
 
     fn par_ind_iter_mut<'offs, O: PrimInt + Sync>(

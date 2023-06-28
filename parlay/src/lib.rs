@@ -29,7 +29,6 @@ mod macros;
 pub mod internal;
 
 pub mod random;
-pub mod parallel;
 pub mod utilities;
 pub mod primitives;
 pub mod hash_table;

@@ -24,11 +24,8 @@
 // SOFTWARE.
 // ============================================================================
 
-use rayon::range::Iter;
-use rayon::iter::Map;
+use std::slice::from_raw_parts;
 use rayon::prelude::*;
-
-use crate::uget_slice;
 
 static _LOG_BLOCK_SIZE: usize = 10;
 pub static _BLOCK_SIZE: usize = 1 << _LOG_BLOCK_SIZE;
@@ -121,7 +118,7 @@ pub fn scan_serial_inplace<T, F>(
     T: Copy + Clone,
     F: Fn(T, T) -> T,
 {
-    let inp_shadow = unsafe { uget_slice!(inp, T) };
+    let inp_shadow = unsafe { from_raw_parts(inp.as_ptr(), inp.len()) };
     scan_serial(inp_shadow, inp, offset, inclusive, op)
 }
 
@@ -159,45 +156,14 @@ where
     blk_offset
 }
 
-pub fn scan_delayed <T, F, C>(inp: Map<Iter<usize>, C>, sums: &mut Vec<T>, op: F) -> T where
-    T: Default + Send + Sync + Default + Clone + Copy,
-    F: Fn(T, T) -> T + Clone + Copy + Send + Sync,
-    C: Fn(usize) -> T + Send + Sync,
-{
-    inp
-        .chunks(_BLOCK_SIZE)
-        .zip(sums.par_iter_mut())
-        .for_each(|(arr, sum)| {
-            *sum = arr[0];
-            for j in 1..arr.len() {
-                *sum = op(*sum, arr[j]);
-            }
-        });
-
-    let total =
-        scan_serial_inplace(sums, T::default(), false, op);
-
-    // To realize delayed operation, this step is performed in the caller function.
-    /*
-    inp_clone
-        .chunks(_BLOCK_SIZE)
-        .zip(sums)
-        .zip(out.par_chunks_mut(_BLOCK_SIZE))
-        .for_each( |((arr, sum), l_out)| {
-            scan_serial(&arr, l_out, sum, inclusive, op);
-        });
-    t.next("out");
-    */
-    total
-}
-
 /// in-place scan operation on `arr`
 /// using a binary associative operator `op` in parallel
-pub fn scan_inplace<T, F>(inp: &mut [T], inclusive: bool, op: F) -> T where
+pub fn scan_inplace<T, F>(inp: &mut [T], inclusive: bool, op: F) -> T
+where
     T: Default + Send + Sync + Clone + Copy,
     F: Fn(T, T) -> T + Clone + Send + Sync,
 {
-    let inp_shadow = unsafe { uget_slice!(inp, T) };
+    let inp_shadow = unsafe { from_raw_parts(inp.as_ptr(), inp.len()) };
     scan_(inp_shadow, inp, inclusive, op)
 }
 

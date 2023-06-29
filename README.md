@@ -1,10 +1,15 @@
+# Rusty-PBBS: A replica of PBBS in Rust.
+
+Rusty-PBBS is a benchmark suite of regular and irregular parallelism in Rust,
+introduced at SPAA'23.
+We invested substantial effort into developing this codebase,
+and we kindly request that you acknowledge our work
+by citing our paper when using this code for your own research:
+
 [Brief Announcement: Is the Problem-Based Benchmark Suite Fearless with Rust?](https://doi.org/10.1145/3558481.3591313)<br>
 Javad Abdi, Guowei Zhang, Mark C. Jeffrey<br>
 ACM Symposium on Parallelism in Algorithms and Architectures (SPAA), 2023
 
-
-# Rusty-PBBS
-A replica of PBBS in Rust.
 
 # Build
 
@@ -54,14 +59,14 @@ To get the full list of flags and arguments use `--help`:
 
 ## Example
 
-Run parallel dedup for 10 rounds on an input.
+Run parallel dedup for 3 rounds on an input.
 ```bash
 $ /.../dedup -o outfile -a parhash -r 3 /path/to/input
 
 dedup:	2.560179
 dedup:	2.608721
 dedup:	2.492258
-OutLoopTime:total:	12.966530
+OutLoopTime:total:	7.966530
 2.578050534s
 ```
 

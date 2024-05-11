@@ -1,3 +1,8 @@
+# Important Notice
+
+**This repository has been archived and is no longer actively maintained. Please visit the [new version](https://github.com/mcj-group/rpb) of this project, which is an updated fork with additional benchmarks.**
+
+
 # Rusty-PBBS: A replica of PBBS in Rust.
 
 Rusty-PBBS is a benchmark suite of regular and irregular parallelism in Rust,
